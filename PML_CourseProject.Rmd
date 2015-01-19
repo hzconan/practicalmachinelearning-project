@@ -48,10 +48,11 @@ data.testing<-read.csv("./data/pml-testing.csv", na.strings=c("NA",""), stringsA
 
 Data Pre-Processing
 -------------------
-It's important to apply a function in order to filter the features with any missing data, in other words, there are many variables in the dataset and it's imperative to remove any with NA's values or empty strings. It's also being removed all columns that are not included in the prediction model.
+It's important to apply a function in order to filter the features which might contain any missing data, in other words, there are many variables in the dataset and it's imperative to remove any with NA's values or empty strings. It's also being removed all columns that are not included in the prediction model.
 It's important to point that it's not necessary to **create a data partition** for these datasets because there are already two set of files one for training and one for testing.
+Finally, it's also considered to show a histogram for each type of accelerometer used in differents parts of the body. This is done by a function and help of **ggplot2** packages which was previously loaded.
 
-```{r, cache=TRUE, echo=TRUE}
+```{r, cache=TRUE, echo=TRUE, fig.width=7, fig.height=6}
 filteringdata<-function(dataset)
   {
   keepdata<-!sapply(dataset, function(x) any(is.na(x)))
@@ -71,27 +72,30 @@ data.testing<-filteringdata(data.testing)
 #head(data.training)
 #head(data.testing)
 
-histGroup <- function (data, regex) {
+histogramxGroup <- function (data, regex) {
   col <- grep(regex, names(data))
   col <- c(col, which(names(data) == "classe"))
   n <- nrow(data)
   DMelted <- melt(data[, col, ][ , ], id.vars=c("classe"))
   ggplot(DMelted, aes(x=classe, y=value)) +
-    geom_violin(aes(color=classe, fill=classe), alpha=1/2) +
+    #geom_violin(aes(color=classe, fill=classe), alpha=1/2) +
+    geom_jitter(aes(color=classe, fill=classe), alpha=1/10) +
     facet_wrap(~ variable, scale="free_y") +
-    scale_color_brewer(palette="Spectral") +
-    scale_fill_brewer(palette="Spectral") +
+    scale_color_brewer(type="qual", palette=1) +
+    scale_fill_brewer(type="qual", palette=1) +
     labs(x="", y="") +
     theme(legend.position="none")
 }
 
-histGroup(data.training,"belt")
+histogramxGroup(data.training,"belt")
+histogramxGroup(data.training,"[^(fore)]arm")
+histogramxGroup(data.training,"dumbbell")
+histogramxGroup(data.training,"forearm")
 
 ```
 
-Train The Prediction Model
---------------------------
-
+Train and Evaluate The Prediction Model
+---------------------------------------
 You can also embed plots, for example:
 
 ```{r fig.width=7, fig.height=6}
@@ -101,6 +105,6 @@ plot(cars)
 
 Applying Prediction Mode On Data Test
 -------------------------------------
-
+bla bla bla bla bla...
 
 
