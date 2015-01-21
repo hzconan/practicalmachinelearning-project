@@ -18,6 +18,7 @@ An important hint in this process is to highlight that in this step it's being i
 library(caret)
 library(randomForest)
 library(rattle)
+library(pROC)
 
 library(rpart)
 
@@ -119,14 +120,19 @@ accuracy.table<-data.frame(Model=c("Random Forest", "SVM (radial)"), Accuracy=c(
 accuracy.table
 
 hatm1<-predict(model1, data.training)
+hatm2<-predict(model2, data.training)
 
 #hatm1tmp<-predict(model1, data.training, type="class") #either raw or prob
 
 confusionMatrix(hatm1, data.training$classe)
+confusionMatrix(hatm2, data.training$classe)
 
 varImp(model1)
+require(pROC)
+varImp(model2)
 
 model1$finalModel
+model2$finalModel
 
 stopCluster(cluster.cores)
 ```
