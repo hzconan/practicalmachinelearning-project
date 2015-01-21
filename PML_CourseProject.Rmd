@@ -104,6 +104,10 @@ histogramxGroup(data.training,"forearm")
 Train and Evaluate The Prediction Model
 ---------------------------------------
 For training the dataset will be used **random forest** and **SVM (radial kernel)** algorithms. The goal is to get an accuracy of greather than 0.930. For processing the dataset faster, it will be used parallel clusters which were defined in the first section and will be stopped as a final step in this section because of size of the data. For testing the model it won't be needed to parallelize cores. 
+The cross-validation is being done 5 times with help of the parameter number in the **trainControl** function.
+It's also shown a cross-validation accuracy table for these two models where the model which uses **random forest** reach more higher accuracy than other model.
+The prediction models are applied to the **hat** variables and then the confussion Matrix is generated. 
+Finally, it will be calculated variable importance for each model and then it's written that **randon forest** algorithm gives a better accuracy of **99,57%**
 
 ```{r cache=TRUE, echo=TRUE, fig.width=15, fig.height=15}
 controlPM<-trainControl(method="cv", number=5, allowParallel=TRUE, verboseIter=TRUE)
@@ -137,9 +141,28 @@ model2$finalModel
 stopCluster(cluster.cores)
 ```
 
-
 Applying Prediction Mode On Data Test
 -------------------------------------
-bla bla bla bla bla...
+Once the prediction model has been calculated so it's time to apply it on the test data set.
 
+```{r cache=TRUE, echo=TRUE}
+hatTD<-predict(model1, data.testing)
+#confusionMatrix(hatTD, data.test$classe)
+data.testing<-cbind(hatTD, data.testing)
+subset(data.testing, select=names(data.testing)[grep("belt|[^(fore)]arm|dumbbell|forearm", names(data.testing), invert=TRUE)])
+```
 
+Submission results to Coursera
+------------------------------
+The last step is to generate files for each row/case of the test data set. It's being used a coursera code to achieve that.
+
+```{r cache=TRUE, echo=TRUE}
+pml_write_files = function(x){
+  n = length(x)
+  for(i in 1:n){
+    filename = paste0("./answers/problem_id_",i,".txt")
+    write.table(x[i],file=filename,quote=FALSE,row.names=FALSE,col.names=FALSE)
+  }
+}
+pml_write_files(hatTD)
+```
