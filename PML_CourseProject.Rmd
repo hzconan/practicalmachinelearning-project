@@ -18,10 +18,15 @@ An important hint in this process is to highlight that in this step it's being i
 library(caret)
 library(randomForest)
 library(rattle)
+
+library(rpart)
+
 library(parallel)
 library(doParallel)
+
 library(ggplot2)
 library(reshape2)
+
 library(xtable)
 #using parallel clusters for the cores of this machine/server
 cluster.cores<-makeCluster(detectCores()-1)
@@ -99,13 +104,30 @@ Train and Evaluate The Prediction Model
 ---------------------------------------
 For training the dataset will be used **random forest** and **SVM (radial kernel)** algorithms. The goal is to get an accuracy of greather than 0.930. For processing the dataset faster, it will be used parallel clusters which were defined in the first section and will be stopped as a final step in this section because of size of the data. For testing the model it won't be needed to parallelize cores. 
 
-```{r cache=TRUE, echo=TRUE, fig.width=7, fig.height=6}
+```{r cache=TRUE, echo=TRUE, fig.width=15, fig.height=15}
 controlPM<-trainControl(method="cv", number=5, allowParallel=TRUE, verboseIter=TRUE)
 model1<-train(classe~., data=data.training,method="rf",trControl=controlPM)
 model2<-train(classe~., data=data.training,method="svmRadial",trControl=controlPM)
+
 accuracy.table<-data.frame(Model=c("Random Forest", "SVM (radial)"), Accuracy=c(round(max(head(model1$results)$Accuracy),3), round(max(head(model2$results)$Accuracy),3)))
+
+#require(rpart.plot)
+#build.dt <- rpart(classe ~ ., data=data.training, method="class")
+#build.dt$Accuracy
+#fancyRpartPlot(build.dt)
+
 accuracy.table
-fancyRpartPlot(model1)
+
+hatm1<-predict(model1, data.training)
+
+#hatm1tmp<-predict(model1, data.training, type="class") #either raw or prob
+
+confusionMatrix(hatm1, data.training$classe)
+
+varImp(model1)
+
+model1$finalModel
+
 stopCluster(cluster.cores)
 ```
 
